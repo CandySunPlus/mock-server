@@ -8,6 +8,7 @@ import tornado.web
 
 from crypt import crypt
 from tornado import gen
+from tornado import httputil
 from data import SUPPORTED_FORMATS, SUPPORTED_MIMES, DEFAULT_FORMAT
 from data import SUPPORTED_METHODS
 from tornado_flash_message_mixin import FlashMessageMixin
@@ -54,6 +55,17 @@ class BaseHandler(tornado.web.RequestHandler):
             return
         for name, value in headers:
             self.set_header(name, value)
+
+    def set_status(self, status_code, reason=None):
+        self._status_code = status_code
+        if reason is not None:
+            self._reason = escape.native_str(reason)
+        else:
+            try:
+                self._reason = httputil.responses[status_code]
+            except KeyError:
+                self._reason = '%s Customer status' % status_code
+
 
     def log_request(self, response=None):
         data = {
